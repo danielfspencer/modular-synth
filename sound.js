@@ -6,6 +6,38 @@ class Module {
     this.output = {}
     this.tune = {}
   }
+
+  getHTMLObject() {
+    const div = document.createElement('div')
+    div.className = 'module'
+
+    let tunings = ''
+    for (let tuning of Object.keys(this.tune)) {
+      let currValue = this.tune[tuning].get()
+      tunings += `<label for='${name}-${tuning}'>${tuning}</label>
+      <input type='number' id='${name}-${tuning}' name='${name}-${tuning}' value='${currValue}'>`
+    }
+
+    let inputs = ''
+    for (let input of Object.keys(this.input)) {
+      inputs += `<div class='module-connector input' title='${input}'></div>`
+    }
+
+    let outputs = ''
+    for (let output of Object.keys(this.output)) {
+      outputs += `<div class='module-connector output' title='${output}'></div>`
+    }
+
+    div.innerHTML = `
+      <div class='module-header'>${this.constructor.name}</div>
+      <div class='module-io'>
+        ${tunings}<hr>
+        ${inputs}<hr>
+        ${outputs}
+      </div>`
+
+    return div
+  }
 }
 
 class Oscillator extends Module {
@@ -36,9 +68,12 @@ class Oscillator extends Module {
     }
 
     this.tune = {
-      set_freq: (freq) => {
-        for (let type of types) {
-          this.nodes[type].frequency.value = freq
+      freq: {
+        get: () => { return this.nodes.sine.frequency.value },
+        set: (freq) => {
+          for (let type of types) {
+            this.nodes[type].frequency.value = freq
+          }
         }
       }
     }
@@ -95,4 +130,10 @@ function init () {
 
   main.output.sin.connect(out_gain.input.signal)
   out_gain.output.signal.connect(out.input.signal)
+
+  let modules = [out, main, lfo1, lfo2, gain1, gain2, out_gain]
+
+  modules.forEach((module) => {
+    document.querySelector('#container').appendChild(module.getHTMLObject())
+  })
 }
