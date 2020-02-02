@@ -5,17 +5,18 @@ class Module {
     this.input = {}
     this.output = {}
     this.tune = {}
+
+    this.div = document.createElement('div')
   }
 
   getHTMLObject() {
-    const div = document.createElement('div')
-    div.className = 'module'
+    this.div.className = 'module'
 
     let tunings = ''
     for (let tuning of Object.keys(this.tune)) {
-      let currValue = this.tune[tuning].get()
-      tunings += `<label for='${name}-${tuning}'>${tuning}</label>
-      <input type='number' id='${name}-${tuning}' name='${name}-${tuning}' value='${currValue}'>`
+      let currValue = Math.round(this.tune[tuning].get() * 10) / 10
+      tunings += `<label for='${tuning}'>${tuning}</label>
+      <input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
     }
 
     let inputs = ''
@@ -28,7 +29,7 @@ class Module {
       outputs += `<div class='module-connector output' title='${output}'></div>`
     }
 
-    div.innerHTML = `
+    this.div.innerHTML = `
       <div class='module-header'>${this.constructor.name}</div>
       <div class='module-io'>
         ${tunings}<hr>
@@ -36,7 +37,18 @@ class Module {
         ${outputs}
       </div>`
 
-    return div
+    return this.div
+  }
+
+  attachHandlers() {
+    for (let [name, funcs] of Object.entries(this.tune)) {
+      let input = this.div.querySelector(`#${name}`)
+      input.addEventListener('change', () => {
+        if (input.validity.valid) {
+          funcs.set(parseFloat(input.value))
+        }
+      })
+    }
   }
 }
 
@@ -56,6 +68,17 @@ class Oscillator extends Module {
       this.nodes[type].start()
     }
 
+    this.tune = {
+      freq: {
+        get: () => { return this.nodes.sine.frequency.value },
+        set: (value) => {
+          for (let type of types) {
+            this.nodes[type].frequency.value = value
+          }
+        }
+      }
+    }
+
     this.input = {
       freq_mod: this.nodes.detune
     }
@@ -67,16 +90,6 @@ class Oscillator extends Module {
       sqr: this.nodes.square
     }
 
-    this.tune = {
-      freq: {
-        get: () => { return this.nodes.sine.frequency.value },
-        set: (freq) => {
-          for (let type of types) {
-            this.nodes[type].frequency.value = freq
-          }
-        }
-      }
-    }
   }
 }
 
@@ -84,7 +97,21 @@ class Amplifer extends Module {
   constructor(gain) {
     super()
     this.nodes.gain = context.createGain()
-    this.nodes.gain.gain.value = gain
+    this.nodes.gain.gain.value = 1
+
+    this.nodes.manualGain = context.createGain()
+    this.nodes.manualGain.gain.value = gain
+
+    this.nodes.gain.connect(this.nodes.manualGain)
+
+    this.tune = {
+      gain: {
+        get: () => { return this.nodes.manualGain.gain.value },
+        set: (value) => {
+          this.nodes.manualGain.gain.value = value
+        }
+      }
+    }
 
     this.input = {
       signal: this.nodes.gain,
@@ -92,7 +119,7 @@ class Amplifer extends Module {
     }
 
     this.output = {
-      signal: this.nodes.gain
+      signal: this.nodes.manualGain
     }
   }
 }
@@ -112,7 +139,7 @@ function init () {
 
   let out = new Output()
 
-  let main = new Oscillator(330)
+  let main = new Oscillator(262)
 
   let lfo1 = new Oscillator(0.5)
   let lfo2 = new Oscillator(8)
@@ -120,7 +147,7 @@ function init () {
   let gain1 = new Amplifer(0.1)
   let gain2 = new Amplifer(0.3)
 
-  let out_gain = new Amplifer(0.3)
+  let out_gain = new Amplifer(0.35)
 
   lfo1.output.sin.connect(gain1.input.signal)
   gain1.output.signal.connect(lfo2.input.freq_mod)
@@ -135,5 +162,6 @@ function init () {
 
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
+    module.attachHandlers()
   })
 }
