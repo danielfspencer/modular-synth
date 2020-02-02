@@ -1,32 +1,15 @@
+let droop = 80
+let activeItem = null
+let nodes = []
+
 let canvasElement
 let canvasCtx
 
-let droop = 80
-
-let nodes = []
-
-window.addEventListener('resize', initCanvas)
-
-function initCanvas() {
-  canvasCtx.canvas.width = window.innerWidth
-  canvasCtx.canvas.height = window.innerHeight
-
-  canvasCtx.lineWidth = 4
-  canvasCtx.lineCap = "round"
-
-  draw()
-}
-
-let activeItem = null
-
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll(".module").forEach((module) => {
-    nodes.push(module.querySelector(".module-connector"))
-  })
-
   canvasElement = document.querySelector('#canvas')
   canvasCtx = canvasElement.getContext('2d')
 
+  window.addEventListener('resize', initCanvas)
   initCanvas()
 
   let container = document.querySelector("#container")
@@ -38,11 +21,21 @@ document.addEventListener('DOMContentLoaded', () => {
   container.addEventListener("mousemove", drag)
 })
 
+function initCanvas() {
+  canvasCtx.canvas.width = window.innerWidth
+  canvasCtx.canvas.height = window.innerHeight
+
+  canvasCtx.lineWidth = 4
+  canvasCtx.lineCap = "round"
+
+  draw()
+}
+
 function draw () {
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height)
 
-  for (let i = 0; i < (nodes.length - 1); i++) {
-    drawLine(getCoords(nodes[i]), getCoords(nodes[i+1]))
+  for (let pair of nodes) {
+    drawLine(getCoords(pair[0]), getCoords(pair[1]))
   }
 }
 
