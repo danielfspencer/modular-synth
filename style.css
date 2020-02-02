@@ -15,8 +15,9 @@
 }
 
 body {
-  overflow: hidden;
   margin: 0;
+  background-image: radial-gradient(#9b9b9b 1px, transparent 0);
+  background-size: 20px 20px;
 }
 
 .module {
