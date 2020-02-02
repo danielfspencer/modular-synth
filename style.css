@@ -16,6 +16,7 @@
 
 body {
   overflow: hidden;
+  margin: 0;
 }
 
 .module {
@@ -28,15 +29,21 @@ body {
 
 .module-header {
   cursor: move;
+  text-align: center;
   font-family: monospace;
   font-weight: bold;
 }
 
 .module-connector {
+  margin: 2px;
   border-radius: 50%;
   background-color: gray;
   border: 2px solid black;
   width: 1em;
   height: 1em;
   cursor: crosshair;
+}
+
+.module-io > .module-connector {
+  display: inline-block;
 }

@@ -17,7 +17,7 @@ function initCanvas() {
   draw()
 }
 
-var activeItem = null
+let activeItem = null
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll(".module").forEach((module) => {
