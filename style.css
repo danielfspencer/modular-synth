@@ -65,6 +65,18 @@ body {
   display: inline-block;
 }
 
-input {
+input[type=number] {
   width: 6em;
+  height: 1.5em;
+  border: 2px dashed darkgray;
+  background: none;
+  font-family: 'Roboto Mono';
+  font-weight: bold;
+  font-size: 0.95em;
+  color: black;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+ opacity: 1;
 }
