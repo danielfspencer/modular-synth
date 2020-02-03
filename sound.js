@@ -56,16 +56,17 @@ class Oscillator extends Module {
   constructor(freq, detune) {
     super()
 
-    this.nodes.detune = context.createGain()
-    this.nodes.detune.gain.value = 6000
+    this.nodes.detune = new GainNode(context, { gain: 6000 })
 
     const types = ['sine', 'triangle', 'sawtooth', 'square']
     for (let type of types) {
-      this.nodes[type] = context.createOscillator()
-      this.nodes[type].type = type
-      this.nodes[type].frequency.value = freq
-      this.nodes.detune.connect(this.nodes[type].detune)
-      this.nodes[type].start()
+      let oscillator = new OscillatorNode(context, {
+        type: type,
+        frequency: freq
+      })
+      this.nodes.detune.connect(oscillator.detune)
+      oscillator.start()
+      this.nodes[type] = oscillator
     }
 
     this.tune = {
@@ -96,12 +97,8 @@ class Oscillator extends Module {
 class Amplifer extends Module {
   constructor(gain) {
     super()
-    this.nodes.gain = context.createGain()
-    this.nodes.gain.gain.value = 1
-
-    this.nodes.manualGain = context.createGain()
-    this.nodes.manualGain.gain.value = gain
-
+    this.nodes.gain = new GainNode(context, { gain: 1 })
+    this.nodes.manualGain = new GainNode(context, { gain: gain })
     this.nodes.gain.connect(this.nodes.manualGain)
 
     this.tune = {
