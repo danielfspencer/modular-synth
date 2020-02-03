@@ -145,8 +145,6 @@ function connect (mod1, mod2, port1, port2) {
 
 
 function init () {
-  context = new AudioContext()
-
   let out = new Output()
   let main = new Oscillator(262)
   let lfo1 = new Oscillator(0.5)

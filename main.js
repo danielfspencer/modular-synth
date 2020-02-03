@@ -1,5 +1,6 @@
 let droop = 80
 let activeItem = null
+let context = null
 let nodes = []
 
 let canvasElement
@@ -10,7 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
   canvasCtx = canvasElement.getContext('2d')
 
   window.addEventListener('resize', initCanvas)
-  initCanvas()
+
+  context = new AudioContext()
+  context.suspend()
 
   let container = document.querySelector("#container")
   container.addEventListener("touchstart", dragStart)
@@ -19,6 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
   container.addEventListener("mousedown", dragStart)
   container.addEventListener("mouseup", dragEnd)
   container.addEventListener("mousemove", drag)
+
+  document.querySelector('#start').addEventListener('click', () => context.resume())
+  document.querySelector('#stop').addEventListener('click', () => context.suspend())
+
+  init()
+  initCanvas()
 })
 
 function initCanvas() {
