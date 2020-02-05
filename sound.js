@@ -1,4 +1,4 @@
-/* global context, nodes, GainNode, OscillatorNode */
+/* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode */
 
 class Module {
   constructor () {
@@ -43,13 +43,59 @@ class Module {
   }
 
   attachHandlers () {
-    for (const [name, funcs] of Object.entries(this.tune)) {
-      const input = this.div.querySelector(`#${name}`)
-      input.addEventListener('change', () => {
-        if (input.validity.valid) {
-          funcs.set(parseFloat(input.value))
-        }
+    for (const [name, func] of Object.entries(this.tune)) {
+      const element = this.div.querySelector(`#${name}`)
+      element.addEventListener('change', (event) => {
+        this._tuneableChanged(event, (value) => func.set(value))
       })
+    }
+
+    for (const name in this.output) {
+      const element = this.div.querySelector(`#${name}.output`)
+      element.addEventListener('mouseup', (event) => {
+        this._mouseUp(event, element, this.output[name])
+      })
+
+      element.addEventListener('mousedown', (event) => {
+        this._mouseDown(event, element, this.output[name])
+      })
+
+      element.addEventListener('contextmenu', (event) => event.preventDefault())
+    }
+
+    for (const name in this.input) {
+      const element = this.div.querySelector(`#${name}.input`)
+      element.addEventListener('mouseup', (event) => {
+        this._mouseUp(event, element, this.input[name])
+      })
+
+      element.addEventListener('mousedown', (event) => {
+        this._mouseDown(event, element, this.input[name])
+      })
+
+      element.addEventListener('contextmenu', (event) => event.preventDefault())
+    }
+  }
+
+  _tuneableChanged (event, callback) {
+    if (event.target.validity.valid) {
+      callback(parseFloat(event.target.value))
+    }
+  }
+
+  _mouseDown (event, element, node) {
+    if (event.which === 3) {
+      disconnectPort([element, node])
+    } else {
+      connectionStart([element, node])
+    }
+  }
+
+  _mouseUp (event, element, node) {
+    if (event.which === 3) {
+      disconnectPort([element, node])
+    } else {
+      connectionEnd([element, node])
     }
   }
 }
@@ -130,15 +176,6 @@ class Output extends Module {
   }
 }
 
-function connect (mod1, mod2, port1, port2) {
-  console.log(`${port1} -> ${port2}`)
-  mod1.output[port1].connect(mod2.input[port2])
-
-  const elem1 = mod1.div.querySelector(`#${port1}.output`)
-  const elem2 = mod2.div.querySelector(`#${port2}.input`)
-  nodes.push([elem1, elem2])
-}
-
 function init () { // eslint-disable-line no-unused-vars
   const out = new Output()
   const main = new Oscillator(262)
@@ -147,17 +184,18 @@ function init () { // eslint-disable-line no-unused-vars
   const gain1 = new Amplifer(0.1)
   const gain2 = new Amplifer(0.3)
   const outGain = new Amplifer(0.35)
+  const another = new Amplifer(0.2)
 
-  const modules = [out, main, lfo1, lfo2, gain1, gain2, outGain]
+  const modules = [out, main, lfo1, lfo2, gain1, gain2, outGain, another]
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
     module.attachHandlers()
   })
 
-  connect(lfo1, gain1, 'saw', 'signal')
-  connect(gain1, lfo2, 'signal', 'freq_mod')
-  connect(lfo2, gain2, 'sin', 'signal')
-  connect(gain2, main, 'signal', 'freq_mod')
-  connect(main, outGain, 'sin', 'signal')
-  connect(outGain, out, 'signal', 'signal')
+  // connect(lfo1, gain1, 'saw', 'signal')
+  // connect(gain1, lfo2, 'signal', 'freq_mod')
+  // connect(lfo2, gain2, 'sin', 'signal')
+  // connect(gain2, main, 'signal', 'freq_mod')
+  // connect(main, outGain, 'sin', 'signal')
+  // connect(outGain, out, 'signal', 'signal')
 }
