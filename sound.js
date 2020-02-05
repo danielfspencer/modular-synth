@@ -9,6 +9,7 @@ class Module {
     this.tune = {}
 
     this.div = document.createElement('div')
+    this.labels = { tune: {}, inputs: {}, outputs: {} }
   }
 
   getHTMLObject () {
@@ -17,26 +18,32 @@ class Module {
     let tunings = ''
     for (const tuning of Object.keys(this.tune)) {
       const currValue = Math.round(this.tune[tuning].get() * 10) / 10
-      tunings += `<label for='${tuning}'>${tuning}</label>
+      tunings += `<label for='${tuning}'>${this.labels.tune[tuning]}</label>
       <input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
     }
 
     let inputs = ''
     for (const input of Object.keys(this.input)) {
-      inputs += `<div class='module-connector input' id='${input}' title='${input}'></div>`
+      inputs += `<div class='module-connector-label input'><div>${this.labels.inputs[input]}</div>
+      <div class='module-connector input' id='${input}'></div></div>`
     }
 
     let outputs = ''
     for (const output of Object.keys(this.output)) {
-      outputs += `<div class='module-connector output' id='${output}' title='${output}'></div>`
+      outputs += `<div class='module-connector-label output'><div>${this.labels.outputs[output]}</div>
+      <div class='module-connector output' id='${output}'></div></div>`
     }
 
     this.div.innerHTML = `
       <div class='module-header'>${this.constructor.name}</div>
-      <div class='module-io'>
-        ${tunings}<hr>
-        ${inputs}<hr>
-        ${outputs}
+      <div class='module-body'>
+        ${tunings}
+        ${(inputs !== '' && outputs !== '') ? '<hr>' : ''}
+        <div class='module-io'>
+          ${inputs}
+        </div><div class='module-io'>
+          ${outputs}
+        </div>
       </div>`
 
     return this.div
@@ -52,28 +59,28 @@ class Module {
 
     for (const name in this.output) {
       const element = this.div.querySelector(`#${name}.output`)
-      element.addEventListener('mouseup', (event) => {
+      element.parentNode.addEventListener('mouseup', (event) => {
         this._mouseUp(event, element, this.output[name])
       })
 
-      element.addEventListener('mousedown', (event) => {
+      element.parentNode.addEventListener('mousedown', (event) => {
         this._mouseDown(event, element, this.output[name])
       })
 
-      element.addEventListener('contextmenu', (event) => event.preventDefault())
+      element.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
     }
 
     for (const name in this.input) {
       const element = this.div.querySelector(`#${name}.input`)
-      element.addEventListener('mouseup', (event) => {
+      element.parentNode.addEventListener('mouseup', (event) => {
         this._mouseUp(event, element, this.input[name])
       })
 
-      element.addEventListener('mousedown', (event) => {
+      element.parentNode.addEventListener('mousedown', (event) => {
         this._mouseDown(event, element, this.input[name])
       })
 
-      element.addEventListener('contextmenu', (event) => event.preventDefault())
+      element.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
     }
   }
 
@@ -137,6 +144,12 @@ class Oscillator extends Module {
       saw: this.nodes.sawtooth,
       sqr: this.nodes.square
     }
+
+    this.labels = {
+      tune: { freq: 'Freq.' },
+      inputs: { freq_mod: 'v/oct' },
+      outputs: { sin: 'sin', tri: 'tri', saw: 'saw', sqr: 'sqr' }
+    }
   }
 }
 
@@ -164,6 +177,12 @@ class Amplifer extends Module {
     this.output = {
       signal: this.nodes.manualGain
     }
+
+    this.labels = {
+      tune: { gain: 'Gain' },
+      inputs: { signal: 'in', gain: 'gain' },
+      outputs: { signal: 'out' }
+    }
   }
 }
 
@@ -172,6 +191,10 @@ class Output extends Module {
     super()
     this.input = {
       signal: context.destination
+    }
+
+    this.labels = {
+      inputs: { signal: 'mono' }
     }
   }
 }
