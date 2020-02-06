@@ -186,6 +186,28 @@ class Amplifer extends Module {
   }
 }
 
+class SummingAmplifer extends Module {
+  constructor (ways) {
+    super()
+    this.nodes.summingGain = new GainNode(context, { gain: 1 })
+
+    this.nodes.gains = []
+    for (let i = 0; i < ways; i++) {
+      const gainNode = new GainNode(context, { gain: 1 })
+      gainNode.connect(this.nodes.summingGain)
+      this.input[`in-${i}`] = gainNode
+      this.labels.inputs[`in-${i}`] = `#${i}`
+      this.nodes.gains.push(gainNode)
+    }
+
+    this.output = {
+      signal: this.nodes.summingGain
+    }
+
+    this.labels.outputs = { signal: 'sum' }
+  }
+}
+
 class Output extends Module {
   constructor () {
     super()
@@ -208,8 +230,10 @@ function init () { // eslint-disable-line no-unused-vars
   const gain2 = new Amplifer(0.3)
   const outGain = new Amplifer(0.35)
   const another = new Amplifer(0.2)
+  const another2 = new Amplifer(0.2)
+  const summer = new SummingAmplifer(4)
 
-  const modules = [out, main, lfo1, lfo2, gain1, gain2, outGain, another]
+  const modules = [summer, out, main, lfo1, lfo2, gain1, gain2, outGain, another, another2]
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
     module.attachHandlers()
