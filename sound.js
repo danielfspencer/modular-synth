@@ -163,9 +163,7 @@ class Amplifer extends Module {
     this.tune = {
       gain: {
         get: () => { return this.nodes.manualGain.gain.value },
-        set: (value) => {
-          this.nodes.manualGain.gain.value = value
-        }
+        set: (value) => { this.nodes.manualGain.gain.value = value }
       }
     }
 
@@ -215,9 +213,7 @@ class Output extends Module {
       signal: context.destination
     }
 
-    this.labels = {
-      inputs: { signal: 'mono' }
-    }
+    this.labels.inputs = { signal: 'mono' }
   }
 }
 
