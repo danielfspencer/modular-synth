@@ -57,52 +57,40 @@ class Module {
       })
     }
 
-    for (const name in this.output) {
-      const element = this.div.querySelector(`#${name}.output`)
-      element.parentNode.addEventListener('mouseup', (event) => {
-        this._mouseUp(event, element, this.output[name])
-      })
+    for (const [name, audioNode] of Object.entries(this.output)) {
+      const elem = this.div.querySelector(`#${name}.output`)
 
-      element.parentNode.addEventListener('mousedown', (event) => {
-        this._mouseDown(event, element, this.output[name])
-      })
+      elem.parentNode.addEventListener('mouseup', (event) => this._mouseUp(event, elem, audioNode))
+      elem.parentNode.addEventListener('mousedown', (event) => this._mouseDown(event, elem, audioNode))
+      elem.parentNode.addEventListener('touchstart', (event) => this._mouseDown(event, elem, audioNode))
 
-      element.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
+      elem.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
     }
 
-    for (const name in this.input) {
-      const element = this.div.querySelector(`#${name}.input`)
-      element.parentNode.addEventListener('mouseup', (event) => {
-        this._mouseUp(event, element, this.input[name])
-      })
+    for (const [name, audioNode] of Object.entries(this.input)) {
+      const elem = this.div.querySelector(`#${name}.input`)
 
-      element.parentNode.addEventListener('mousedown', (event) => {
-        this._mouseDown(event, element, this.input[name])
-      })
+      elem.parentNode.addEventListener('mouseup', (event) => this._mouseUp(event, elem, audioNode))
+      elem.parentNode.addEventListener('mousedown', (event) => this._mouseDown(event, elem, audioNode))
+      elem.parentNode.addEventListener('touchstart', (event) => this._mouseDown(event, elem, audioNode))
 
-      element.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
+      elem.parentNode.addEventListener('contextmenu', (event) => event.preventDefault())
     }
   }
 
-  _tuneableChanged (event, callback) {
+  _mouseUp (event, elem, node) {
+    event.preventDefault()
+    connectionEnd(elem, node)
+  }
+
+  _mouseDown (event, elem, node) {
+    event.preventDefault()
+    connectionStart(elem, node)
+  }
+
+  _tuneableChanged (event, elem, callback) {
     if (event.target.validity.valid) {
       callback(parseFloat(event.target.value))
-    }
-  }
-
-  _mouseDown (event, element, node) {
-    if (event.which === 3) {
-      disconnectPort([element, node])
-    } else {
-      connectionStart([element, node])
-    }
-  }
-
-  _mouseUp (event, element, node) {
-    if (event.which === 3) {
-      disconnectPort([element, node])
-    } else {
-      connectionEnd([element, node])
     }
   }
 }

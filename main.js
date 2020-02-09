@@ -1,4 +1,4 @@
-/* global init, AudioContext */
+/* global init, AudioContext, Event */
 
 const droop = 80
 let activeItem = null
@@ -10,11 +10,11 @@ let canvasCtx
 
 let firstConnection = null
 
-function connectionStart ([element, node]) {
+function connectionStart (element, node) {
   firstConnection = [element, node]
 }
 
-function connectionEnd ([element, node]) {
+function connectionEnd (element, node) {
   connectPorts(firstConnection, [element, node])
 }
 
@@ -84,12 +84,23 @@ document.addEventListener('DOMContentLoaded', () => {
   container.addEventListener('mouseup', dragEnd)
   container.addEventListener('mousemove', drag)
 
+  container.addEventListener('touchend', touchEndHack)
+
   document.querySelector('#start').addEventListener('click', () => context.resume())
   document.querySelector('#stop').addEventListener('click', () => context.suspend())
 
   init()
   initCanvas()
 })
+
+function touchEndHack (event) {
+  // dispatch a mouseUp event at the element the touch was above when it was released
+  const coords = [event.changedTouches[0].pageX, event.changedTouches[0].pageY]
+  const elem = document.elementFromPoint(...coords)
+  if (elem !== undefined) {
+    elem.dispatchEvent(new Event('mouseup', { bubbles: true }))
+  }
+}
 
 function initCanvas () {
   canvasCtx.canvas.width = window.innerWidth
