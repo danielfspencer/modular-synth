@@ -77,14 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
   context.suspend()
 
   const container = document.querySelector('#container')
-  container.addEventListener('touchstart', dragStart)
-  container.addEventListener('touchend', dragEnd)
+  container.addEventListener('touchstart', dragStart, true)
+  container.addEventListener('touchend', dragEnd, true)
   container.addEventListener('touchmove', drag)
-  container.addEventListener('mousedown', dragStart)
-  container.addEventListener('mouseup', dragEnd)
+  container.addEventListener('mousedown', dragStart, true)
+  container.addEventListener('mouseup', dragEnd, true)
   container.addEventListener('mousemove', drag)
 
-  container.addEventListener('touchend', touchEndHack)
+  container.addEventListener('contextmenu', (event) => event.preventDefault())
+
+  document.addEventListener('touchend', touchEndHack)
 
   document.querySelector('#start').addEventListener('click', () => context.resume())
   document.querySelector('#stop').addEventListener('click', () => context.suspend())
