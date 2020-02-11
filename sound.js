@@ -88,7 +88,7 @@ class Module {
     connectionStart(elem, node)
   }
 
-  _tuneableChanged (event, elem, callback) {
+  _tuneableChanged (event, callback) {
     if (event.target.validity.valid) {
       callback(parseFloat(event.target.value))
     }
