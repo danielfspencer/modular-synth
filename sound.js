@@ -80,12 +80,18 @@ class Module {
 
   _mouseUp (event, elem, node) {
     event.preventDefault()
-    connectionEnd(elem, node)
+    if (event.which !== 3) {
+      connectionEnd(elem, node)
+    } else {
+      disconnectPort(elem, node)
+    }
   }
 
   _mouseDown (event, elem, node) {
     event.preventDefault()
-    connectionStart(elem, node)
+    if (event.which !== 3) {
+      connectionStart(elem, node)
+    }
   }
 
   _tuneableChanged (event, callback) {

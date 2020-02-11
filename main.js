@@ -44,22 +44,30 @@ function connectPorts ([elem1, node1], [elem2, node2]) {
   }
 
   outputNode.connect(inputNode)
-  edges.push([outputElem, inputElem])
+  edges.push([[outputElem, outputNode], [inputElem, inputNode]])
   draw()
 }
 
-function disconnectPort ([elem, node]) {
+function disconnectPort (elem, node) {
   if (elem.classList.contains('output')) {
     console.log('- outputs cannot be disconnected')
-    // return
+    return
   }
 
-  node.disconnect()
+  for (let i = 0; i < edges.length; i++) {
+    const [[outputElem, outputNode], [inputElem, inputNode]] = edges[i]
+
+    if (inputNode == node) {
+      outputNode.disconnect(inputNode)
+      edges.splice(i, 1)
+      draw()
+    }
+  }
 }
 
-function inputInGraph (node) {
-  for (let [outputElem, inputElem] of edges) {
-    if (node === inputElem) {
+function inputInGraph (elem) {
+  for (let [[outputElem, outputNode], [inputElem, inputNode]] of edges) {
+    if (elem === inputElem) {
       return true
     }
   }
@@ -117,8 +125,8 @@ function initCanvas () {
 function draw () {
   canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height)
 
-  for (const pair of edges) {
-    drawLine(getCoords(pair[0]), getCoords(pair[1]))
+  for (const [[outputElem, outputNode], [inputElem, inputNode]] of edges) {
+    drawLine(getCoords(outputElem), getCoords(inputElem))
   }
 }
 
