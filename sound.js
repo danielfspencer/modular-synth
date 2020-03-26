@@ -200,6 +200,39 @@ class SummingAmplifer extends Module {
   }
 }
 
+class Filter extends Module {
+  constructor (type) {
+    super()
+    this.nodes.filter = new BiquadFilterNode(context, { type: type })
+
+    this.tune = {
+      qfactor: {
+        get: () => { return this.nodes.filter.Q.value },
+        set: (value) => { this.nodes.filter.Q.value = value }
+      },
+      detune: {
+        get: () => { return this.nodes.filter.detune.value },
+        set: (value) => { this.nodes.filter.detune.value = value }
+      }
+    }
+
+    this.input = {
+      signal: this.nodes.filter,
+      freq: this.nodes.filter.frequency
+    }
+
+    this.output = {
+      signal: this.nodes.filter
+    }
+
+    this.labels = {
+      tune: { qfactor: 'q', detune: 'freq' },
+      inputs: { signal: 'in', freq: 'freq' },
+      outputs: { signal: 'out' }
+    }
+  }
+}
+
 class Output extends Module {
   constructor () {
     super()
@@ -212,18 +245,28 @@ class Output extends Module {
 }
 
 function init () { // eslint-disable-line no-unused-vars
-  const out = new Output()
-  const main = new Oscillator(262)
-  const lfo1 = new Oscillator(0.5)
-  const lfo2 = new Oscillator(8)
-  const gain1 = new Amplifer(0.1)
-  const gain2 = new Amplifer(0.3)
-  const outGain = new Amplifer(0.35)
-  const another = new Amplifer(0.2)
-  const another2 = new Amplifer(0.2)
-  const summer = new SummingAmplifer(4)
+  // const out = new Output()
+  // const main = new Oscillator(262)
+  // const lfo1 = new Oscillator(0.5)
+  // const lfo2 = new Oscillator(8)
+  // const gain1 = new Amplifer(0.1)
+  // const gain2 = new Amplifer(0.3)
+  // const outGain = new Amplifer(0.35)
+  // const another = new Amplifer(0.2)
+  // const another2 = new Amplifer(0.2)
+  // const summer = new SummingAmplifer(4)
+  //
+  // const modules = [summer, out, main, lfo1, lfo2, gain1, gain2, outGain, another, another2]
 
-  const modules = [summer, out, main, lfo1, lfo2, gain1, gain2, outGain, another, another2]
+  let modules = []
+  modules.push(new Output())
+  modules.push(new Oscillator(262))
+  modules.push(new Oscillator(2))
+  modules.push(new Amplifer(1))
+  modules.push(new Amplifer(0.2))
+  modules.push(new Filter('lowpass'))
+
+
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
     module.attachHandlers()
