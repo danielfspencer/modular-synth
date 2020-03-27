@@ -210,15 +210,15 @@ class Filter extends Module {
         get: () => { return this.nodes.filter.Q.value },
         set: (value) => { this.nodes.filter.Q.value = value }
       },
-      detune: {
-        get: () => { return this.nodes.filter.detune.value },
-        set: (value) => { this.nodes.filter.detune.value = value }
+      freq: {
+        get: () => { return this.nodes.filter.frequency.value },
+        set: (value) => { this.nodes.filter.frequency.value = value }
       }
     }
 
     this.input = {
       signal: this.nodes.filter,
-      freq: this.nodes.filter.frequency
+      detune: this.nodes.filter.detune
     }
 
     this.output = {
@@ -226,8 +226,8 @@ class Filter extends Module {
     }
 
     this.labels = {
-      tune: { qfactor: 'q', detune: 'freq' },
-      inputs: { signal: 'in', freq: 'freq' },
+      tune: { qfactor: 'q', freq: 'freq' },
+      inputs: { signal: 'in', detune: 'freq' },
       outputs: { signal: 'out' }
     }
   }
