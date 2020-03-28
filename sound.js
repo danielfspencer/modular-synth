@@ -142,7 +142,7 @@ class Oscillator extends Module {
     this.tune = {
       freq: {
         range: { type: 'log', min: 50, max: 12000, default: freq },
-        get: () => { return normalToLog(this.nodes.sine.frequency.value, 50, 12000) },
+        get: () => normalToLog(this.nodes.sine.frequency.value, 50, 12000),
         set: (value) => {
           for (const type of types) {
             this.nodes[type].frequency.value = logToNormal(value, 50, 12000)
@@ -180,7 +180,7 @@ class Amplifer extends Module {
     this.tune = {
       gain: {
         range: { type: 'numeric', min: 0, max: 2, default: gain, step: 0.01 },
-        get: () => { return this.nodes.manualGain.gain.value },
+        get: () => this.nodes.manualGain.gain.value,
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
     }
@@ -232,12 +232,12 @@ class Filter extends Module {
     this.tune = {
       qfactor: {
         range: { type: 'log', min: 0.0001, max: 1000, default: 1 },
-        get: () => { return normalToLog(this.nodes.filter.Q.value, 0.0001, 1000) },
+        get: () => normalToLog(this.nodes.filter.Q.value, 0.0001, 1000),
         set: (value) => { this.nodes.filter.Q.value = logToNormal(value, 0.0001, 1000) }
       },
       freq: {
         range: { type: 'log', min: 10, max: 15000, default: 350 },
-        get: () => { return normalToLog(this.nodes.filter.frequency.value, 10, 15000) },
+        get: () => normalToLog(this.nodes.filter.frequency.value, 10, 15000),
         set: (value) => { this.nodes.filter.frequency.value = logToNormal(value, 10, 15000) }
       }
     }
