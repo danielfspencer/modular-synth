@@ -89,6 +89,44 @@ hr {
   display: inline-block;
 }
 
+.module-tuning {
+  display: grid;
+}
+
+.param-container {
+  height: 2em;
+}
+
+.param-placeholder {
+  height: 1em;
+  position: relative;
+  box-shadow: 0 0 0 4px #fff, 0 0 0 7px #a4a4a4;
+  margin: 7px 0;
+  background: #000000;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+}
+
+.param-placeholder > input[type=range] {
+  width: 400px;
+  position: absolute;
+  transform: translateX(-50%);
+  height: 5px;
+  border-radius: 5px;
+  background: gray;
+}
+
+input[type=range]::-webkit-slider-thumb,
+input[type=range]::-moz-range-thumb  {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.5em;
+  height: 1.5em;
+  background: #49BDD0;
+  cursor: pointer;
+}
+
 input[type=number] {
   width: 6em;
   height: 1.5em;
