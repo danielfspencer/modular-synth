@@ -1,4 +1,5 @@
-/* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode */
+/* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode,
+BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, normalToLog, logToNormal */
 
 class Module {
   constructor () {
@@ -17,9 +18,25 @@ class Module {
 
     let tunings = ''
     for (const tuning of Object.keys(this.tune)) {
-      const currValue = Math.round(this.tune[tuning].get() * 10) / 10
-      tunings += `<label for='${tuning}'>${this.labels.tune[tuning]}</label>
-      <input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
+      const tune = this.tune[tuning]
+      const currValue = Math.round(tune.get() * 10) / 10
+
+      tunings += `<label for='${tuning}'>${this.labels.tune[tuning]}</label>`
+      if (tune.range) {
+        let range = ''
+        switch (tune.range.type) {
+          case 'log': {
+            const initial = normalToLog(tune.range.default, tune.range.min, tune.range.max)
+            range = `min='${LOG_SLIDER_MIN}' max='${LOG_SLIDER_MAX}' value='${initial}' step='1'`
+          } break
+          default:
+            range = `min='${tune.range.min}' max='${tune.range.max}' step='${tune.range.step}'`
+            break
+        }
+        tunings += `<input type='range' id='${tuning}' name='${tuning}' ${range}>`
+      } else {
+        tunings += `<input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
+      }
     }
 
     let inputs = ''
@@ -52,7 +69,7 @@ class Module {
   attachHandlers () {
     for (const [name, func] of Object.entries(this.tune)) {
       const element = this.div.querySelector(`#${name}`)
-      element.addEventListener('change', (event) => {
+      element.addEventListener('input', (event) => {
         this._tuneableChanged(event, (value) => func.set(value))
       })
     }
@@ -102,7 +119,7 @@ class Module {
 }
 
 class Oscillator extends Module {
-  constructor (freq, detune) {
+  constructor (freq) {
     super()
     this.nodes.detune = new GainNode(context, { gain: 6000 })
 
@@ -119,10 +136,11 @@ class Oscillator extends Module {
 
     this.tune = {
       freq: {
-        get: () => { return this.nodes.sine.frequency.value },
+        range: { type: 'log', min: 50, max: 12000 },
+        get: () => { return normalToLog(this.nodes.sine.frequency.value, 50, 12000) },
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].frequency.value = value
+            this.nodes[type].frequency.value = logToNormal(value, 50, 12000)
           }
         }
       }
@@ -156,6 +174,7 @@ class Amplifer extends Module {
 
     this.tune = {
       gain: {
+        range: { type: 'numeric', min: 0, max: 2, step: 0.1 },
         get: () => { return this.nodes.manualGain.gain.value },
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
@@ -207,12 +226,14 @@ class Filter extends Module {
 
     this.tune = {
       qfactor: {
-        get: () => { return this.nodes.filter.Q.value },
-        set: (value) => { this.nodes.filter.Q.value = value }
+        range: { type: 'log', min: 0.0001, max: 1000 },
+        get: () => { return normalToLog(this.nodes.filter.Q.value, 0.0001, 1000) },
+        set: (value) => { this.nodes.filter.Q.value = logToNormal(value, 0.0001, 1000) }
       },
       freq: {
-        get: () => { return this.nodes.filter.frequency.value },
-        set: (value) => { this.nodes.filter.frequency.value = value }
+        range: { type: 'log', min: 10, max: 15000 },
+        get: () => { return normalToLog(this.nodes.filter.frequency.value, 10, 15000) },
+        set: (value) => { this.nodes.filter.frequency.value = logToNormal(value, 10, 15000) }
       }
     }
 
@@ -258,14 +279,14 @@ function init () { // eslint-disable-line no-unused-vars
   //
   // const modules = [summer, out, main, lfo1, lfo2, gain1, gain2, outGain, another, another2]
 
-  let modules = []
+  const modules = []
   modules.push(new Output())
   modules.push(new Oscillator(262))
   modules.push(new Oscillator(2))
   modules.push(new Amplifer(1))
-  modules.push(new Amplifer(0.2))
-  modules.push(new Filter('lowpass'))
-
+  modules.push(new Amplifer(0.1))
+  modules.push(new SummingAmplifer(4))
+  modules.push(new Filter('bandpass'))
 
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
