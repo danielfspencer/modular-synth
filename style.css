@@ -115,15 +115,29 @@ hr {
   height: 5px;
   border-radius: 5px;
   background: gray;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-input[type=range]::-webkit-slider-thumb,
 input[type=range]::-moz-range-thumb  {
   -webkit-appearance: none;
   appearance: none;
-  width: 1.5em;
-  height: 1.5em;
-  background: #49BDD0;
+  width: 20px;
+  height: 20px;
+  background: #f0f0f0;
+  border: 2px solid #999999;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #f0f0f0;
+  border: 2px solid #999999;
+  border-radius: 5px;
   cursor: pointer;
 }
 
