@@ -84,15 +84,14 @@ document.addEventListener('DOMContentLoaded', () => {
   context = new AudioContext()
   context.suspend()
 
-  const container = document.querySelector('#container')
-  container.addEventListener('touchstart', dragStart, true)
-  container.addEventListener('touchend', dragEnd, true)
-  container.addEventListener('touchmove', drag)
-  container.addEventListener('mousedown', dragStart, true)
-  container.addEventListener('mouseup', dragEnd, true)
-  container.addEventListener('mousemove', drag)
+  document.addEventListener('touchstart', dragStart, true)
+  document.addEventListener('touchend', dragEnd, true)
+  document.addEventListener('touchmove', drag)
+  document.addEventListener('mousedown', dragStart, true)
+  document.addEventListener('mouseup', dragEnd, true)
+  document.addEventListener('mousemove', drag)
 
-  container.addEventListener('contextmenu', (event) => event.preventDefault())
+  document.addEventListener('contextmenu', (event) => event.preventDefault())
 
   document.addEventListener('touchend', touchEndHack)
 
