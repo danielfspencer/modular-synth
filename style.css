@@ -52,7 +52,7 @@ body {
 }
 
 hr {
-  margin: 8px 0;
+  margin: 0 0 8px 0;
   border: 1px solid #bfbfbf;
 }
 
@@ -89,26 +89,32 @@ hr {
   display: inline-block;
 }
 
-.module-tuning {
-  display: grid;
+.module-tuning > .param-container {
+  display: inline-block;
 }
 
 .param-container {
-  height: 2em;
+  width: 3em;
+  font-family: 'Roboto Mono';
+  overflow: hidden;
+  font-weight: bold;
+  font-size: 10pt;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .param-placeholder {
-  height: 1em;
   position: relative;
-  box-shadow: 0 0 0 4px #fff, 0 0 0 7px #a4a4a4;
-  margin: 7px 0;
-  background: #000000;
-  border-radius: 50%;
-  width: 10px;
-  height: 10px;
+  margin: 4px auto;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  background: url('assets/img/dial.svg');
+  background-size: contain;
 }
 
 .param-placeholder > input[type=range] {
+  display: none;
   width: 400px;
   position: absolute;
   transform: translateX(-50%);
