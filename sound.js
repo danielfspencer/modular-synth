@@ -80,9 +80,12 @@ class Module {
       })
 
       element.parentNode.parentNode.addEventListener('click', (event) => {
-        element.parentNode.classList.toggle('open')
+        element.parentNode.classList.add('open')
       })
     }
+
+    document.addEventListener('mousedown', (event) => this._closeAllSliders(event))
+    document.addEventListener('touchstart', (event) => this._closeAllSliders(event))
 
     for (const [name, audioNode] of Object.entries(this.output)) {
       const elem = this.div.querySelector(`#${name}.output`)
@@ -124,6 +127,16 @@ class Module {
   _tuneableChanged (event, callback) {
     if (event.target.validity.valid) {
       callback(parseFloat(event.target.value))
+    }
+    event.stopPropagation()
+  }
+
+  _closeAllSliders (event) {
+    for (const name in this.tune) {
+      const element = this.div.querySelector(`.range-slider #${name}`).parentNode
+      if (event.target !== element) {
+        element.classList.remove('open')
+      }
     }
   }
 }
