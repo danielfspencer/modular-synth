@@ -55,13 +55,15 @@ class Module {
       <div class='module-connector output' id='${output}'></div></div>`
     }
 
+    const tuningsPresent = Object.keys(this.tune).length !== 0
+
     this.div.innerHTML = `
       <div class='module-header'>${this.constructor.name}</div>
       <div class='module-body'>
         <div class='module-tuning'>
           ${tunings}
         </div>
-        ${(inputs !== '' && outputs !== '') ? '<hr>' : ''}
+        ${(tuningsPresent) ? '<hr>' : ''}
         <div class='module-io'>
           ${inputs}
         </div><div class='module-io'>
