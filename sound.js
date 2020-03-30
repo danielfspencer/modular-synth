@@ -81,11 +81,11 @@ class Module {
 
       element.parentNode.parentNode.addEventListener('click', (event) => {
         element.parentNode.classList.add('open')
+        event.stopPropagation()
       })
     }
 
-    document.addEventListener('mousedown', (event) => this._closeAllSliders(event))
-    document.addEventListener('touchstart', (event) => this._closeAllSliders(event))
+    document.addEventListener('click', (event) => this._closeAllSliders(event))
 
     for (const [name, audioNode] of Object.entries(this.output)) {
       const elem = this.div.querySelector(`#${name}.output`)
