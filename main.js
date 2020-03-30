@@ -145,7 +145,7 @@ function drawLine (start, end) {
 
 function getCoords (element) {
   const rect = element.getBoundingClientRect()
-  return [rect.x + rect.width / 2, rect.y + rect.height / 2]
+  return [(window.pageXOffset + rect.left ) + rect.width / 2, (window.pageYOffset + rect.top) + rect.height / 2]
 }
 
 function dragStart (e) {
