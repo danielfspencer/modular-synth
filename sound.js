@@ -21,7 +21,8 @@ class Module {
       const tune = this.tune[tuning]
       const currValue = Math.round(tune.get() * 10) / 10
 
-      tunings += `<div class='param-container'><div>${this.labels.tune[tuning]}</div><div class='param-placeholder'>`
+      tunings += `<div class='param-container'><div>${this.labels.tune[tuning]}</div><div class='param-placeholder'>
+      <div class='range-slider'>`
       if (tune.range) {
         let range = ''
         switch (tune.range.type) {
@@ -39,7 +40,7 @@ class Module {
         tunings += `<input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
       }
 
-      tunings += '</div></div>'
+      tunings += '</div></div></div>'
     }
 
     let inputs = ''
@@ -76,6 +77,10 @@ class Module {
       const element = this.div.querySelector(`#${name}`)
       element.addEventListener('input', (event) => {
         this._tuneableChanged(event, (value) => func.set(value))
+      })
+
+      element.parentNode.parentNode.addEventListener('click', (event) => {
+        element.parentNode.classList.toggle('open')
       })
     }
 
