@@ -10,7 +10,7 @@ class Module {
     this.tune = {}
 
     this.div = document.createElement('div')
-    this.labels = { tune: {}, inputs: {}, outputs: {} }
+    this.labels = { module: 'unknown', tune: {}, inputs: {}, outputs: {} }
   }
 
   getHTMLObject () {
@@ -58,7 +58,7 @@ class Module {
     const tuningsPresent = Object.keys(this.tune).length !== 0
 
     this.div.innerHTML = `
-      <div class='module-header'>${this.constructor.name}</div>
+      <div class='module-header'>${this.labels.module}</div>
       <div class='module-body'>
         <div class='module-tuning'>
           ${tunings}
@@ -183,6 +183,7 @@ class Oscillator extends Module {
     }
 
     this.labels = {
+      module: 'Oscillator',
       tune: { freq: 'Freq.' },
       inputs: { freq_mod: 'v/oct' },
       outputs: { sin: 'sin', tri: 'tri', saw: 'saw', sqr: 'sqr' }
@@ -215,6 +216,7 @@ class Amplifer extends Module {
     }
 
     this.labels = {
+      module: 'Amplifer',
       tune: { gain: 'Gain' },
       inputs: { signal: 'in', gain: 'gain' },
       outputs: { signal: 'out' }
@@ -240,6 +242,7 @@ class SummingAmplifer extends Module {
       signal: this.nodes.summingGain
     }
 
+    this.labels.module = 'Mixer'
     this.labels.outputs = { signal: 'sum' }
   }
 }
@@ -272,6 +275,7 @@ class Filter extends Module {
     }
 
     this.labels = {
+      module: 'Filter',
       tune: { qfactor: 'q', freq: 'freq' },
       inputs: { signal: 'in', detune: 'freq' },
       outputs: { signal: 'out' }
@@ -286,6 +290,7 @@ class Output extends Module {
       signal: context.destination
     }
 
+    this.labels.module = 'Output'
     this.labels.inputs = { signal: 'mono' }
   }
 }
