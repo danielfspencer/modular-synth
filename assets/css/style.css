@@ -111,7 +111,7 @@ hr {
   width: 30px;
   height: 30px;
   cursor: pointer;
-  background: url('assets/img/dial.svg');
+  background: url('../img/dial.svg');
   background-size: contain;
   position: relative;
 }
