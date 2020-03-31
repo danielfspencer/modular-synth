@@ -248,37 +248,58 @@ class SummingAmplifer extends Module {
 }
 
 class Filter extends Module {
-  constructor (type) {
+  constructor () {
     super()
-    this.nodes.filter = new BiquadFilterNode(context, { type: type })
+
+    this.nodes.signal = new GainNode(context, { gain: 1 })
+    this.nodes.detune = new GainNode(context, { gain: 1 })
+
+    const types = ['bandpass', 'highpass', 'lowpass']
+
+    for (const type of types) {
+      const filter = new BiquadFilterNode(context, { type: type })
+      this.nodes.signal.connect(filter)
+      this.nodes.detune.connect(filter.detune)
+      this.nodes[type] = filter
+    }
 
     this.tune = {
       qfactor: {
         range: { type: 'log', min: 0.0001, max: 1000, default: 1 },
-        get: () => normalToLog(this.nodes.filter.Q.value, 0.0001, 1000),
-        set: (value) => { this.nodes.filter.Q.value = logToNormal(value, 0.0001, 1000) }
+        get: () => normalToLog(this.nodes[types[0]].Q.value, 0.0001, 1000),
+        set: (value) => {
+          for (const type of types) {
+            this.nodes[type].Q.value = logToNormal(value, 0.0001, 1000)
+          }
+        }
       },
       freq: {
         range: { type: 'log', min: 10, max: 15000, default: 350 },
-        get: () => normalToLog(this.nodes.filter.frequency.value, 10, 15000),
-        set: (value) => { this.nodes.filter.frequency.value = logToNormal(value, 10, 15000) }
+        get: () => normalToLog(this.nodes[types[0]].frequency.value, 10, 15000),
+        set: (value) => {
+          for (const type of types) {
+            this.nodes[type].frequency.value = logToNormal(value, 10, 15000)
+          }
+        }
       }
     }
 
     this.input = {
-      signal: this.nodes.filter,
-      detune: this.nodes.filter.detune
+      signal: this.nodes.signal,
+      detune: this.nodes.detune
     }
 
     this.output = {
-      signal: this.nodes.filter
+      bandpass: this.nodes.bandpass,
+      highpass: this.nodes.highpass,
+      lowpass: this.nodes.lowpass
     }
 
     this.labels = {
       module: 'Filter',
-      tune: { qfactor: 'q', freq: 'freq' },
+      tune: { qfactor: 'q-fac', freq: 'freq' },
       inputs: { signal: 'in', detune: 'freq' },
-      outputs: { signal: 'out' }
+      outputs: { bandpass: 'bp', highpass: 'hp', lowpass: 'lp' }
     }
   }
 }
@@ -316,7 +337,7 @@ function init () { // eslint-disable-line no-unused-vars
   modules.push(new Amplifer(1))
   modules.push(new Amplifer(0.1))
   modules.push(new SummingAmplifer(4))
-  modules.push(new Filter('bandpass'))
+  modules.push(new Filter())
 
   modules.forEach((module) => {
     document.querySelector('#container').appendChild(module.getHTMLObject())
