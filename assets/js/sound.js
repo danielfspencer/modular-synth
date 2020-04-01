@@ -191,6 +191,28 @@ class Oscillator extends Module {
   }
 }
 
+class LowFreqOscillator extends Oscillator {
+  constructor (freq) {
+    super()
+
+    const types = ['sine', 'triangle', 'sawtooth', 'square']
+
+    this.tune = {
+      freq: {
+        range: { type: 'numeric', min: 0.1, max: 30, default: freq },
+        get: () => this.nodes[types[0]].frequency.value,
+        set: (value) => {
+          for (const type of types) {
+            this.nodes[type].frequency.value = value
+          }
+        }
+      }
+    }
+
+    this.labels.module = 'LFO'
+  }
+}
+
 class Amplifer extends Module {
   constructor (gain) {
     super()
