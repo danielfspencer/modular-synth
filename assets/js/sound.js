@@ -274,7 +274,7 @@ class Filter extends Module {
     super()
 
     this.nodes.signal = new GainNode(context, { gain: 1 })
-    this.nodes.detune = new GainNode(context, { gain: 1 })
+    this.nodes.detune = new GainNode(context, { gain: 6000 })
 
     const types = ['bandpass', 'highpass', 'lowpass']
 
