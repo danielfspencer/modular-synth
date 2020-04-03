@@ -234,7 +234,7 @@ class Amplifer extends Module {
 
     this.tune = {
       gain: {
-        range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN},
+        range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN },
         // get: () => this.nodes.manualGain.gain.value,
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
@@ -318,6 +318,8 @@ class SummingAmplifer extends Module {
 class Filter extends Module {
   constructor () {
     super()
+    const DEFAULT_Q_FACTOR = 1
+    const DEFAULT_CUTOFF_FREQ = 350
 
     this.nodes.signal = new GainNode(context, { gain: 1 })
     this.nodes.detune = new GainNode(context, { gain: 6000 })
@@ -333,7 +335,7 @@ class Filter extends Module {
 
     this.tune = {
       qfactor: {
-        range: { type: 'log', min: 0.0001, max: 1000, default: 1 },
+        range: { type: 'log', min: 0.0001, max: 1000, default: DEFAULT_Q_FACTOR },
         // get: () => normalToLog(this.nodes[types[0]].Q.value, 0.0001, 1000),
         set: (value) => {
           for (const type of types) {
@@ -342,7 +344,7 @@ class Filter extends Module {
         }
       },
       freq: {
-        range: { type: 'log', min: 10, max: 15000, default: 350 },
+        range: { type: 'log', min: 10, max: 15000, default: DEFAULT_CUTOFF_FREQ },
         // get: () => normalToLog(this.nodes[types[0]].frequency.value, 10, 15000),
         set: (value) => {
           for (const type of types) {
