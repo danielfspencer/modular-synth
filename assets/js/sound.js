@@ -27,17 +27,14 @@ class Module {
         let range = ''
         switch (tune.range.type) {
           case 'log': {
-            console.log([tune.range.default, tune.range.min, tune.range.max])
             const initial = normalToLog(tune.range.default, tune.range.min, tune.range.max)
             range = `min='${LOG_SLIDER_MIN}' max='${LOG_SLIDER_MAX}' value='${initial}' step='1'`
           } break
           default:
-            range = `min='${tune.range.min}' max='${tune.range.max}' step='${tune.range.step}'`
+            range = `min='${tune.range.min}' max='${tune.range.max}' step='0.1'`
             break
         }
         tunings += `<input type='range' id='${tuning}' name='${tuning}' ${range}>`
-      } else {
-        tunings += `<input type='number' id='${tuning}' name='${tuning}' value='${currValue}' step='0.1'>`
       }
 
       tunings += '</div></div></div>'
@@ -144,15 +141,17 @@ class Module {
 }
 
 class Oscillator extends Module {
-  constructor (freq) {
+  constructor () {
     super()
+    const DEFAULT_FREQ = 440
+
     this.nodes.detune = new GainNode(context, { gain: 6000 })
 
     const types = ['sine', 'triangle', 'sawtooth', 'square']
     for (const type of types) {
       const oscillator = new OscillatorNode(context, {
         type: type,
-        frequency: freq
+        frequency: DEFAULT_FREQ
       })
       this.nodes.detune.connect(oscillator.detune)
       oscillator.start()
@@ -161,7 +160,7 @@ class Oscillator extends Module {
 
     this.tune = {
       freq: {
-        range: { type: 'log', min: 50, max: 12000, default: freq },
+        range: { type: 'log', min: 50, max: 12000, default: DEFAULT_FREQ },
         get: () => normalToLog(this.nodes.sine.frequency.value, 50, 12000),
         set: (value) => {
           for (const type of types) {
@@ -192,14 +191,14 @@ class Oscillator extends Module {
 }
 
 class LowFreqOscillator extends Oscillator {
-  constructor (freq) {
+  constructor () {
     super()
-
+    const DEFAULT_FREQ = 2
     const types = ['sine', 'triangle', 'sawtooth', 'square']
 
     this.tune = {
       freq: {
-        range: { type: 'numeric', min: 0.1, max: 30, default: freq },
+        range: { type: 'numeric', min: 0.5, max: 30, default: DEFAULT_FREQ },
         get: () => this.nodes[types[0]].frequency.value,
         set: (value) => {
           for (const type of types) {
@@ -214,15 +213,17 @@ class LowFreqOscillator extends Oscillator {
 }
 
 class Amplifer extends Module {
-  constructor (gain) {
+  constructor () {
     super()
+    const DEFAULT_GAIN = 1
+
     this.nodes.gain = new GainNode(context, { gain: 1 })
-    this.nodes.manualGain = new GainNode(context, { gain: gain })
+    this.nodes.manualGain = new GainNode(context, { gain: DEFAULT_GAIN })
     this.nodes.gain.connect(this.nodes.manualGain)
 
     this.tune = {
       gain: {
-        range: { type: 'numeric', min: 0, max: 2, default: gain, step: 0.01 },
+        range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN, step: 0.01 },
         get: () => this.nodes.manualGain.gain.value,
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
@@ -246,13 +247,47 @@ class Amplifer extends Module {
   }
 }
 
-class SummingAmplifer extends Module {
-  constructor (ways) {
+class Delay extends Module {
+  constructor () {
     super()
+    const DEFAULT_DELAY = 1
+
+    this.nodes.delay = new DelayNode(context, { delayTime: DEFAULT_DELAY, maxDelayTime: 3 })
+
+    this.tune = {
+      delay: {
+        range: { type: 'numeric', min: 0.1, max: 3, default: DEFAULT_DELAY, step: 0.01 },
+        get: () => this.nodes.delay.delayTime.value,
+        set: (value) => { this.nodes.delay.delayTime.value = value }
+      }
+    }
+
+    this.input = {
+      signal: this.nodes.delay
+    }
+
+    this.output = {
+      signal: this.nodes.delay
+    }
+
+    this.labels = {
+      module: 'Delay',
+      tune: { delay: 'time' },
+      inputs: { signal: 'in' },
+      outputs: { signal: 'out' }
+    }
+  }
+}
+
+class SummingAmplifer extends Module {
+  constructor () {
+    super()
+    const DEFAULT_WAYS = 4
+
     this.nodes.summingGain = new GainNode(context, { gain: 1 })
 
     this.nodes.gains = []
-    for (let i = 0; i < ways; i++) {
+    for (let i = 0; i < DEFAULT_WAYS; i++) {
       const gainNode = new GainNode(context, { gain: 1 })
       gainNode.connect(this.nodes.summingGain)
       this.input[`in-${i}`] = gainNode
@@ -336,40 +371,4 @@ class Output extends Module {
     this.labels.module = 'Output'
     this.labels.inputs = { signal: 'mono' }
   }
-}
-
-function init () { // eslint-disable-line no-unused-vars
-  // const out = new Output()
-  // const main = new Oscillator(262)
-  // const lfo1 = new Oscillator(0.5)
-  // const lfo2 = new Oscillator(8)
-  // const gain1 = new Amplifer(0.1)
-  // const gain2 = new Amplifer(0.3)
-  // const outGain = new Amplifer(0.35)
-  // const another = new Amplifer(0.2)
-  // const another2 = new Amplifer(0.2)
-  // const summer = new SummingAmplifer(4)
-  //
-  // const modules = [summer, out, main, lfo1, lfo2, gain1, gain2, outGain, another, another2]
-
-  const modules = []
-  modules.push(new Output())
-  modules.push(new Oscillator(262))
-  modules.push(new Oscillator(2))
-  modules.push(new Amplifer(1))
-  modules.push(new Amplifer(0.1))
-  modules.push(new SummingAmplifer(4))
-  modules.push(new Filter())
-
-  modules.forEach((module) => {
-    document.querySelector('#container').appendChild(module.getHTMLObject())
-    module.attachHandlers()
-  })
-
-  // connect(lfo1, gain1, 'saw', 'signal')
-  // connect(gain1, lfo2, 'signal', 'freq_mod')
-  // connect(lfo2, gain2, 'sin', 'signal')
-  // connect(gain2, main, 'signal', 'freq_mod')
-  // connect(main, outGain, 'sin', 'signal')
-  // connect(outGain, out, 'signal', 'signal')
 }

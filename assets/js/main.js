@@ -1,14 +1,85 @@
-/* global init, AudioContext, Event */
-
+/* global AudioContext, Event
+Oscillator, LowFreqOscillator */
 const droop = 80
-let activeItem = null
-let context = null
 const edges = []
+const modules = []
+
+const mapping = {
+  vco: Oscillator,
+  lfo: LowFreqOscillator,
+  vca: Amplifer,
+  mixer: SummingAmplifer,
+  vcf: Filter
+}
+
+let firstConnection = null
+let activeItem = null
 
 let canvasElement
 let canvasCtx
 
-let firstConnection = null
+let containerElement
+let controlsElement
+
+let startStopElement
+let context
+
+document.addEventListener('DOMContentLoaded', init)
+
+function init () {
+  canvasElement = document.querySelector('#canvas')
+  canvasCtx = canvasElement.getContext('2d')
+  window.addEventListener('resize', initCanvas)
+
+  containerElement = document.querySelector('#container')
+  controlsElement = document.querySelector('#controls')
+
+  context = new AudioContext()
+  context.suspend()
+
+  startStopElement = document.querySelector('#start-stop')
+  startStopElement.addEventListener('click', startStop)
+
+  document.addEventListener('touchstart', dragStart, true)
+  document.addEventListener('touchend', dragEnd, true)
+  document.addEventListener('touchmove', drag)
+  document.addEventListener('mousedown', dragStart, true)
+  document.addEventListener('mouseup', dragEnd, true)
+  document.addEventListener('mousemove', drag)
+  document.addEventListener('touchend', touchEndHack)
+
+  document.addEventListener('contextmenu', (event) => event.preventDefault())
+
+  for (const modName in mapping) {
+    const button = document.createElement('div')
+    button.className = 'button add-module'
+    button.id = modName
+    button.innerText = `+ ${modName}`
+    controlsElement.appendChild(button)
+    controlsElement.querySelector(`#${modName}`).addEventListener('click', () => {
+      addModule(new (mapping[modName])())
+    })
+  }
+
+  addModule(new Output())
+  initCanvas()
+}
+
+function addModule(module) {
+  containerElement.appendChild(module.getHTMLObject())
+  module.attachHandlers()
+  modules.push(module)
+}
+
+function startStop () {
+  if (context.state === 'suspended') {
+    context.resume()
+    startStopElement.innerHTML = '&#x25a0;'
+  } else {
+    context.suspend()
+    startStopElement.innerHTML = '&#x25b6;'
+  }
+}
 
 function connectionStart (element, node) {
   firstConnection = [element, node]
@@ -74,33 +145,6 @@ function inputInGraph (elem) {
 
   return false
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  canvasElement = document.querySelector('#canvas')
-  canvasCtx = canvasElement.getContext('2d')
-
-  window.addEventListener('resize', initCanvas)
-
-  context = new AudioContext()
-  context.suspend()
-
-  document.addEventListener('touchstart', dragStart, true)
-  document.addEventListener('touchend', dragEnd, true)
-  document.addEventListener('touchmove', drag)
-  document.addEventListener('mousedown', dragStart, true)
-  document.addEventListener('mouseup', dragEnd, true)
-  document.addEventListener('mousemove', drag)
-
-  document.addEventListener('contextmenu', (event) => event.preventDefault())
-
-  document.addEventListener('touchend', touchEndHack)
-
-  document.querySelector('#start').addEventListener('click', () => context.resume())
-  document.querySelector('#stop').addEventListener('click', () => context.suspend())
-
-  init()
-  initCanvas()
-})
 
 function touchEndHack (event) {
   // dispatch a mouseUp event at the element the touch was above when it was released

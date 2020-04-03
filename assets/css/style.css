@@ -3,6 +3,11 @@
   box-sizing: border-box;
 }
 
+.button.add-module {
+  background: gray;
+  text-transform: uppercase;
+}
+
 #canvas {
   top: 0;
   left: 0;
