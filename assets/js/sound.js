@@ -1,5 +1,5 @@
 /* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode,
-BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, normalToLog, logToNormal */
+BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, valueToPosition, positionToValue */
 
 class Module {
   constructor () {
@@ -17,27 +17,29 @@ class Module {
     this.div.className = 'module'
 
     let tunings = ''
-    for (const tuning of Object.keys(this.tune)) {
-      const tune = this.tune[tuning]
-      const currValue = Math.round(tune.get() * 10) / 10
-
-      tunings += `<div class='param-container'><div>${this.labels.tune[tuning]}</div><div class='param-placeholder'>
-      <div class='range-slider'>`
+    for (const [name, tune] of Object.entries(this.tune)) {
+      tunings += `<div class='param-container'><div>${this.labels.tune[name]}</div><div class='param-placeholder'>`
       if (tune.range) {
         let range = ''
         switch (tune.range.type) {
           case 'log': {
-            const initial = normalToLog(tune.range.default, tune.range.min, tune.range.max)
-            range = `min='${LOG_SLIDER_MIN}' max='${LOG_SLIDER_MAX}' value='${initial}' step='1'`
+            const initial = valueToPosition(tune.range.default, tune.range.min, tune.range.max)
+            range = `min='${LOG_SLIDER_MIN}' max='${LOG_SLIDER_MAX}' value='${initial}' step='0.01'`
+            tunings += `<div class='range-slider'><input type='range' id='${name}' ${range}></div>`
+          } break
+          case 'numeric': {
+            const initial = tune.range.default
+            range = `min='${tune.range.min}' max='${tune.range.max}' value='${initial}' step='0.01'`
+            tunings += `<div class='range-slider'><input type='range' id='${name}' ${range}></div>`
           } break
           default:
-            range = `min='${tune.range.min}' max='${tune.range.max}' step='0.1'`
-            break
+            console.error('no range type specified')
         }
-        tunings += `<input type='range' id='${tuning}' name='${tuning}' ${range}>`
+
+        tune.set(tune.range.default)
       }
 
-      tunings += '</div></div></div>'
+      tunings += '</div></div>'
     }
 
     let inputs = ''
@@ -75,7 +77,7 @@ class Module {
     for (const [name, func] of Object.entries(this.tune)) {
       const element = this.div.querySelector(`#${name}`)
       element.addEventListener('input', (event) => {
-        this._tuneableChanged(event, (value) => func.set(value))
+        this._tuneableChanged(event, func)
       })
 
       element.parentNode.parentNode.addEventListener('click', (event) => {
@@ -123,9 +125,18 @@ class Module {
     }
   }
 
-  _tuneableChanged (event, callback) {
+  _tuneableChanged (event, tune) {
     if (event.target.validity.valid) {
-      callback(parseFloat(event.target.value))
+      const position = parseFloat(event.target.value)
+      let value
+
+      if (tune.range.type === 'log') {
+        value = positionToValue(position, tune.range.min, tune.range.max)
+      } else {
+        value = position
+      }
+
+      tune.set(value)
     }
     event.stopPropagation()
   }
@@ -161,10 +172,10 @@ class Oscillator extends Module {
     this.tune = {
       freq: {
         range: { type: 'log', min: 50, max: 12000, default: DEFAULT_FREQ },
-        get: () => normalToLog(this.nodes.sine.frequency.value, 50, 12000),
+        // get: () => normalToLog(this.nodes.sine.frequency.value, 50, 12000),
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].frequency.value = logToNormal(value, 50, 12000)
+            this.nodes[type].frequency.value = value
           }
         }
       }
@@ -198,8 +209,8 @@ class LowFreqOscillator extends Oscillator {
 
     this.tune = {
       freq: {
-        range: { type: 'numeric', min: 0.5, max: 30, default: DEFAULT_FREQ },
-        get: () => this.nodes[types[0]].frequency.value,
+        range: { type: 'log', min: 0.2, max: 50, default: DEFAULT_FREQ },
+        // get: () => this.nodes[types[0]].frequency.value,
         set: (value) => {
           for (const type of types) {
             this.nodes[type].frequency.value = value
@@ -223,8 +234,8 @@ class Amplifer extends Module {
 
     this.tune = {
       gain: {
-        range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN, step: 0.01 },
-        get: () => this.nodes.manualGain.gain.value,
+        range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN},
+        // get: () => this.nodes.manualGain.gain.value,
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
     }
@@ -256,8 +267,8 @@ class Delay extends Module {
 
     this.tune = {
       delay: {
-        range: { type: 'numeric', min: 0.1, max: 3, default: DEFAULT_DELAY, step: 0.01 },
-        get: () => this.nodes.delay.delayTime.value,
+        range: { type: 'numeric', min: 0.1, max: 3, default: DEFAULT_DELAY },
+        // get: () => this.nodes.delay.delayTime.value,
         set: (value) => { this.nodes.delay.delayTime.value = value }
       }
     }
@@ -323,19 +334,19 @@ class Filter extends Module {
     this.tune = {
       qfactor: {
         range: { type: 'log', min: 0.0001, max: 1000, default: 1 },
-        get: () => normalToLog(this.nodes[types[0]].Q.value, 0.0001, 1000),
+        // get: () => normalToLog(this.nodes[types[0]].Q.value, 0.0001, 1000),
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].Q.value = logToNormal(value, 0.0001, 1000)
+            this.nodes[type].Q.value = value
           }
         }
       },
       freq: {
         range: { type: 'log', min: 10, max: 15000, default: 350 },
-        get: () => normalToLog(this.nodes[types[0]].frequency.value, 10, 15000),
+        // get: () => normalToLog(this.nodes[types[0]].frequency.value, 10, 15000),
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].frequency.value = logToNormal(value, 10, 15000)
+            this.nodes[type].frequency.value = value
           }
         }
       }

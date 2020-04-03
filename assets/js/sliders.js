@@ -1,9 +1,7 @@
-/* exported logToNormal, normalToLog */
-
 const LOG_SLIDER_MIN = 0
 const LOG_SLIDER_MAX = 10000
 
-function normalToLog (value, min, max) {
+function valueToPosition (value, min, max) { // eslint-disable-line no-unused-vars
   const minValue = Math.log(min)
   const maxValue = Math.log(max)
   const scale = (maxValue - minValue) / (LOG_SLIDER_MAX - LOG_SLIDER_MIN)
@@ -11,7 +9,7 @@ function normalToLog (value, min, max) {
   return LOG_SLIDER_MIN + (Math.log(value) - minValue) / scale
 }
 
-function logToNormal (position, min, max) {
+function positionToValue (position, min, max) { // eslint-disable-line no-unused-vars
   const minValue = Math.log(min)
   const maxValue = Math.log(max)
   const scale = (maxValue - minValue) / (LOG_SLIDER_MAX - LOG_SLIDER_MIN)
