@@ -26,13 +26,18 @@ body {
 }
 
 #container {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
   height: 100%;
 }
 
+#controls {
+  display: flex;
+}
+
 .module {
-  margin-left: 1em;
+  margin: 20px 0 0 20px;
   height: max-content;
   width: max-content;
   font-family: 'Roboto Medium';
