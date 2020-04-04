@@ -15,8 +15,7 @@ const mapping = {
 let firstConnection = null
 let activeItem = null
 
-let canvasElement
-let canvasCtx
+let two
 
 let containerElement
 let controlsElement
@@ -27,9 +26,12 @@ let context
 document.addEventListener('DOMContentLoaded', init)
 
 function init () {
-  canvasElement = document.querySelector('#canvas')
-  canvasCtx = canvasElement.getContext('2d')
-  window.addEventListener('resize', initCanvas)
+  two = new Two({
+    type: Two.Types.svg,
+    fullscreen: true
+  })
+
+  two.appendTo(document.body)
 
   containerElement = document.querySelector('#container')
   controlsElement = document.querySelector('#controls')
@@ -62,7 +64,6 @@ function init () {
   }
 
   addModule(new Output())
-  initCanvas()
 }
 
 function addModule(module) {
@@ -115,8 +116,9 @@ function connectPorts ([elem1, node1], [elem2, node2]) {
   }
 
   outputNode.connect(inputNode)
-  edges.push([[outputElem, outputNode], [inputElem, inputNode]])
-  draw()
+  const line = drawLine(outputElem, inputElem)
+  edges.push([[outputElem, outputNode], [inputElem, inputNode], line])
+  two.update()
 }
 
 function disconnectPort (elem, node) {
@@ -126,12 +128,13 @@ function disconnectPort (elem, node) {
   }
 
   for (let i = 0; i < edges.length; i++) {
-    const [[outputElem, outputNode], [inputElem, inputNode]] = edges[i]
+    const [[outputElem, outputNode], [inputElem, inputNode], line] = edges[i]
 
     if (inputNode == node) {
       outputNode.disconnect(inputNode)
       edges.splice(i, 1)
-      draw()
+      line.remove()
+      two.update()
     }
   }
 }
@@ -155,36 +158,33 @@ function touchEndHack (event) {
   }
 }
 
-function initCanvas () {
-  canvasCtx.canvas.width = window.innerWidth
-  canvasCtx.canvas.height = window.innerHeight
-
-  canvasCtx.lineWidth = 4
-  canvasCtx.lineCap = 'round'
-
-  draw()
-}
-
 function draw () {
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height)
-
-  for (const [[outputElem, outputNode], [inputElem, inputNode]] of edges) {
-    drawLine(getCoords(outputElem), getCoords(inputElem))
+  for (const [[outputElem, outputNode], [inputElem, inputNode], line] of edges) {
+    line.vertices[0].set(...getCoords(outputElem))
+    line.vertices[1].set(...getCoords(inputElem))
   }
+
+  two.update()
 }
 
 function lerp (start, end, fraction) {
   return start + ((end - start) * fraction)
 }
 
-function drawLine (start, end) {
+function drawLine (startElem, endElem) {
+  const start = getCoords(startElem)
+  const end = getCoords(endElem)
   const midpoint = [lerp(start[0], end[0], 0.5), lerp(start[1], end[1], 0.5)]
+
   midpoint[1] += droop
 
-  canvasCtx.beginPath()
-  canvasCtx.moveTo(...start)
-  canvasCtx.quadraticCurveTo(...midpoint, ...end)
-  canvasCtx.stroke()
+  const line = two.makeLine(...start, ...end)
+
+  line.stroke = '#000'
+  line.linewidth = 4
+  line.cap = 'round'
+
+  return line
 }
 
 function getCoords (element) {
