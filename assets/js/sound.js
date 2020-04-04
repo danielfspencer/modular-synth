@@ -377,8 +377,13 @@ class Filter extends Module {
 class Output extends Module {
   constructor () {
     super()
+    const DEFAULT_GAIN = 0.2
+
+    this.nodes.gain = new GainNode(context, { gain: DEFAULT_GAIN })
+    this.nodes.gain.connect(context.destination)
+
     this.input = {
-      signal: context.destination
+      signal: this.nodes.gain
     }
 
     this.labels.module = 'Output'
