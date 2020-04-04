@@ -1,5 +1,8 @@
 /* global AudioContext, Event
 Oscillator, LowFreqOscillator */
+
+const RENDER_BACKEND = 'svg' // one of ['canvas', 'svg', 'webgl']
+
 const droop = 80
 const edges = []
 const modules = []
@@ -27,7 +30,7 @@ document.addEventListener('DOMContentLoaded', init)
 
 function init () {
   two = new Two({
-    type: Two.Types.svg,
+    type: Two.Types[RENDER_BACKEND],
     fullscreen: true
   })
 
