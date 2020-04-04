@@ -151,6 +151,22 @@ hr {
   text-transform: none;
 }
 
+.info .in-tune {
+  width: 5em;
+  font-family: monospace;
+  text-align: left;
+  display: inline-block;
+  opacity: 0.8;
+}
+
+.info .out-of-tune {
+  width: 5em;
+  font-family: monospace;
+  text-align: left;
+  display: inline-block;
+  opacity: 0.5;
+}
+
 .range-slider.open {
   display: grid;
 }

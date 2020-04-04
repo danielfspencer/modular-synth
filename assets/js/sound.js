@@ -1,5 +1,5 @@
 /* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode,
-BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, valueToPosition, positionToValue */
+BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, valueToPosition, positionToValue, noteFromFreq */
 
 class Module {
   constructor () {
@@ -176,7 +176,9 @@ class Oscillator extends Module {
       freq: {
         range: { type: 'log', min: 50, max: 12000, default: DEFAULT_FREQ },
         get: () => {
-          return `${this.nodes[types[0]].frequency.value.toFixed(2)} Hz`
+          const freq = this.nodes[types[0]].frequency.value
+          const note = noteFromFreq(freq)
+          return `${freq.toFixed(2)} Hz - ${note}`
         },
         set: (value) => {
           for (const type of types) {
