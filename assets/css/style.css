@@ -138,6 +138,18 @@ hr {
   box-shadow: -3px 3px 4px 0px rgba(0, 0, 0, 0.37);
 }
 
+.info {
+  display: block;
+  position: absolute;
+  top: -2em;
+  left: calc(50%);
+  background: #e1e1e1;
+  padding: 0.5em;
+  transform: translateX(-50%);
+  border-radius: inherit;
+  text-transform: none;
+}
+
 .range-slider.open {
   display: grid;
 }
