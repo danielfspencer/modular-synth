@@ -355,7 +355,7 @@ class Filter extends Module {
     this.nodes.signal = new GainNode(context, { gain: 1 })
     this.nodes.detune = new GainNode(context, { gain: 6000 })
 
-    const types = ['bandpass', 'highpass', 'lowpass']
+    const types = ['bandpass', 'highpass', 'lowpass', 'notch']
 
     for (const type of types) {
       const filter = new BiquadFilterNode(context, { type: type })
@@ -396,6 +396,7 @@ class Filter extends Module {
 
     this.output = {
       bandpass: this.nodes.bandpass,
+      notch: this.nodes.notch,
       highpass: this.nodes.highpass,
       lowpass: this.nodes.lowpass
     }
@@ -404,7 +405,7 @@ class Filter extends Module {
       module: 'Filter',
       tune: { qfactor: 'q-fac', freq: 'freq' },
       inputs: { signal: 'in', detune: 'freq' },
-      outputs: { bandpass: 'bp', highpass: 'hp', lowpass: 'lp' }
+      outputs: { bandpass: 'bp', highpass: 'hp', lowpass: 'lp', notch: 'bs' }
     }
   }
 }
