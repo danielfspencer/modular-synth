@@ -269,6 +269,24 @@ class Amplifer extends Module {
   }
 }
 
+class Noise extends Module {
+  constructor () {
+    super()
+    this.nodes.white = context.createWhiteNoise()
+    this.nodes.pink = context.createPinkNoise()
+
+    this.output = {
+      white: this.nodes.white,
+      pink: this.nodes.pink
+    }
+
+    this.labels = {
+      module: 'Noise',
+      outputs: { white: 'white', pink: 'pink'}
+    }
+  }
+}
+
 class Delay extends Module {
   constructor () {
     super()

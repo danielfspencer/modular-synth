@@ -9,7 +9,8 @@ const mapping = {
   lfo: LowFreqOscillator,
   vca: Amplifer,
   vcf: Filter,
-  mixer: SummingAmplifer
+  mixer: SummingAmplifer,
+  noise: Noise
 }
 
 let firstConnection = null
