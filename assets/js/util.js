@@ -42,3 +42,9 @@ function positionToValue (position, min, max) { // eslint-disable-line no-unused
 
   return Math.exp(minValue + scale * (position - LOG_SLIDER_MIN))
 }
+
+const RAMP_TIME = 0.1
+
+function rampParam (context, param, value) { // eslint-disable-line no-unused-vars
+  param.exponentialRampToValueAtTime(value, context.currentTime + RAMP_TIME)
+}

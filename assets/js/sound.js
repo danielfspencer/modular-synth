@@ -1,5 +1,6 @@
 /* global context, connectionStart, connectionEnd, disconnectPort, GainNode, OscillatorNode,
-BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, valueToPosition, positionToValue, noteFromFreq */
+BiquadFilterNode, LOG_SLIDER_MIN, LOG_SLIDER_MAX, valueToPosition, positionToValue, noteFromFreq,
+rampParam */
 
 class Module {
   constructor () {
@@ -26,13 +27,13 @@ class Module {
         switch (tune.range.type) {
           case 'log': {
             const initial = valueToPosition(tune.range.default, tune.range.min, tune.range.max)
-            const info = tune.get()
+            const info = tune.format(tune.range.default)
             range = `min='${LOG_SLIDER_MIN}' max='${LOG_SLIDER_MAX}' value='${initial}' step='0.01'`
             tunings += `<div class='range-slider'><div class='info'>${info}</div><input type='range' id='${name}' ${range}></div>`
           } break
           case 'numeric': {
             const initial = tune.range.default
-            const info = tune.get()
+            const info = tune.format(tune.range.default)
             range = `min='${tune.range.min}' max='${tune.range.max}' value='${initial}' step='0.01'`
             tunings += `<div class='range-slider'><div class='info'>${info}</div><input type='range' id='${name}' ${range}></div>`
           } break
@@ -139,7 +140,7 @@ class Module {
       }
 
       tune.set(value)
-      element.parentNode.querySelector('.info').innerHTML = tune.get()
+      element.parentNode.querySelector('.info').innerHTML = tune.format(value)
     }
     event.stopPropagation()
   }
@@ -175,14 +176,12 @@ class Oscillator extends Module {
     this.tune = {
       freq: {
         range: { type: 'log', min: 50, max: 12000, default: DEFAULT_FREQ },
-        get: () => {
-          const freq = this.nodes[types[0]].frequency.value
-          const note = noteFromFreq(freq)
-          return `${freq.toFixed(2)} Hz - ${note}`
+        format: (value) => {
+          return `${value.toFixed(2)} Hz - ${noteFromFreq(value)}`
         },
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].frequency.value = value
+            rampParam(context, this.nodes[type].frequency, value)
           }
         }
       }
@@ -217,8 +216,8 @@ class LowFreqOscillator extends Oscillator {
     this.tune = {
       freq: {
         range: { type: 'log', min: 0.2, max: 50, default: DEFAULT_FREQ },
-        get: () => {
-          return `${this.nodes[types[0]].frequency.value.toFixed(2)} Hz`
+        format: (value) => {
+          return `${value.toFixed(2)} Hz`
         },
         set: (value) => {
           for (const type of types) {
@@ -244,8 +243,8 @@ class Amplifer extends Module {
     this.tune = {
       gain: {
         range: { type: 'numeric', min: 0, max: 2, default: DEFAULT_GAIN },
-        get: () => {
-          return `${this.nodes.manualGain.gain.value.toFixed(2)}`
+        format: (value) => {
+          return `${value.toFixed(2)}`
         },
         set: (value) => { this.nodes.manualGain.gain.value = value }
       }
@@ -297,8 +296,8 @@ class Delay extends Module {
     this.tune = {
       delay: {
         range: { type: 'numeric', min: 0.1, max: 3, default: DEFAULT_DELAY },
-        get: () => {
-          return `${this.nodes.delay.delayTime.value.toFixed(2)}`
+        format: (value) => {
+          return `${value.toFixed(2)}`
         },
         set: (value) => { this.nodes.delay.delayTime.value = value }
       }
@@ -367,8 +366,8 @@ class Filter extends Module {
     this.tune = {
       qfactor: {
         range: { type: 'log', min: 0.0001, max: 1000, default: DEFAULT_Q_FACTOR },
-        get: () => {
-          return `${this.nodes[types[0]].Q.value.toFixed(3)}`
+        format: (value) => {
+          return `${value.toFixed(3)}`
         },
         set: (value) => {
           for (const type of types) {
@@ -378,12 +377,12 @@ class Filter extends Module {
       },
       freq: {
         range: { type: 'log', min: 10, max: 15000, default: DEFAULT_CUTOFF_FREQ },
-        get: () => {
-          return `${this.nodes[types[0]].frequency.value.toFixed(1)} Hz`
+        format: (value) => {
+          return `${value.toFixed(1)} Hz`
         },
         set: (value) => {
           for (const type of types) {
-            this.nodes[type].frequency.value = value
+            rampParam(context, this.nodes[type].frequency, value)
           }
         }
       }
