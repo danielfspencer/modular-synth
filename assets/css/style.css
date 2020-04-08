@@ -140,6 +140,7 @@ hr {
 }
 
 .info {
+  font-family: 'Roboto Mono';
   display: block;
   position: absolute;
   top: -2em;
@@ -153,7 +154,6 @@ hr {
 
 .info .in-tune {
   width: 5em;
-  font-family: monospace;
   text-align: left;
   display: inline-block;
   opacity: 0.8;
@@ -161,7 +161,6 @@ hr {
 
 .info .out-of-tune {
   width: 5em;
-  font-family: monospace;
   text-align: left;
   display: inline-block;
   opacity: 0.5;
